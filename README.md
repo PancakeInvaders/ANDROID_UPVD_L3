@@ -2,7 +2,4 @@ ANDROID_UPVD_L3
 ===============
 Projet Android 2013-­‐2014 Résolution Sudokuen Réalité Augmenté
 
-Télécharger la librairy OpenCV 
-http://www.opencv.org/downloads.html
-
-Et référencer la librairie dans les propriétés du projet à partir d'Eclipse.
+Importer le projet dans Eclipse, et référencer la librairie dans les propriétés du projet "SolverSudoku" à partir d'Eclipse.
