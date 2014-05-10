@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <string name="app_name">Solver Sudoku UPVD</string>
-    <string name="hello_upvd">Hello upvd</string>
-    <string name="menu_draw">Afficher/Cacher le rectangle de détection</string>
-    <string name="title_activity_main">MainActivity</string>
-
-</resources>
