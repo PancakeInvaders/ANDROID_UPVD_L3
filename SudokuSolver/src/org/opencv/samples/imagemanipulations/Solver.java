@@ -1,4 +1,4 @@
-package org.opencv.samples.tutorial3;
+package org.opencv.samples.imagemanipulations;
 
 /**
  * Class qui permet de retourner une grille de sudoku résolue

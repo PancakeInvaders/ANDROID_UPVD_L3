@@ -38,6 +38,7 @@ containing a value of this type.
     }
     public static final class drawable {
         public static final int icon=0x7f020000;
+        public static final int txt_pour_pas_que_le_dossier_soit_vide=0x7f020001;
     }
     public static final class id {
         public static final int any=0x7f040000;
