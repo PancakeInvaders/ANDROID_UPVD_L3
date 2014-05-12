@@ -1,12 +1,23 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+     android:orientation="vertical" >
 
     <org.opencv.android.JavaCameraView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/image_manipulations_activity_surface_view" 
-        android:onClick="resolveSudoku"/>
-
-</LinearLayout>
+        android:onClick="resolveSudokuThread"/>
+    
+    
+	<TextView
+	        android:id="@+id/text_id"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/message_avertissement" 
+	        android:layout_marginBottom="16dp"
+	        android:layout_gravity="bottom|center_horizontal"
+	        android:visibility="visible"/>
+	
+</FrameLayout>
