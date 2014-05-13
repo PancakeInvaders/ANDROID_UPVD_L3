@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Sudoku Solver</string>
-    <string name="message_avertissement">L\'analyse de l\'image peut prendre quelques minutes</string>
+    <string name="message_avertissement">Cliquez pour lancer l\'analyse de l\'image, cette opération peut prendre quelques minutes</string>
     
 </resources>

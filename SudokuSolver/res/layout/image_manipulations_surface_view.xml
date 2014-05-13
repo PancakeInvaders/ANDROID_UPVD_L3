@@ -10,7 +10,7 @@
         android:id="@+id/image_manipulations_activity_surface_view" 
         android:onClick="resolveSudokuThread"/>
     
-    
+    <!--
 	<TextView
 	        android:id="@+id/text_id"
 	        android:layout_width="wrap_content"
@@ -19,5 +19,5 @@
 	        android:layout_marginBottom="16dp"
 	        android:layout_gravity="bottom|center_horizontal"
 	        android:visibility="visible"/>
-	
+	-->
 </FrameLayout>

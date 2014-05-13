@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 
@@ -41,7 +40,7 @@ public class LectureIMG {
 				File dir = new File(path);
 				if (!dir.exists()) {
 					if (!dir.mkdirs()) {
-						System.out.println("ERROR: Creation of directory " + path + " on sdcard failed");
+						System.out.println("ERROR: Creation of directory " + path + " on storage has failed");
 						return;
 					} else {
 						System.out.println( "Created directory " + path + " on sdcard");
@@ -75,9 +74,7 @@ public class LectureIMG {
 					//gin.close();
 					out.close();
 					
-					System.out.println( "Copied " + lang + " traineddata");
 				} catch (IOException e) {
-					System.out.println( "Was unable to copy " + lang + " traineddata " + e.toString());
 					e.printStackTrace(System.out);
 				}
 			}
@@ -103,8 +100,6 @@ public class LectureIMG {
 		filename = file.toString();
 		Highgui.imwrite(filename, img);
 		
-		System.out.println(path.getAbsolutePath());
-		
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inSampleSize = 4;
 
@@ -129,15 +124,17 @@ public class LectureIMG {
 		baseApi.init(path.getAbsolutePath(), lang);
 		baseApi.setImage(bitmap);
 		
-		String recognizedText = baseApi.getUTF8Text();
+		baseApi.setVariable("tessedit_char_whitelist", "123456789");
 		
-		System.out.println(recognizedText);
+		String recognizedText = baseApi.getUTF8Text();
 		
 		boolean parsable = true;
 		
+		int num = 0;
+		
 		try{
 			
-			Integer.parseInt(recognizedText);
+			num = Integer.parseInt(recognizedText);
 			
 		}
 		catch(NumberFormatException e ){
@@ -148,13 +145,19 @@ public class LectureIMG {
 		
 		if(parsable == true){
 			
+			if((num < 1) || (num > 9)){
+				
+				return "echec lecture";
+				
+			}
+			
 			return recognizedText;
 			
 		}
-		else{
-			
-			return "echec lecture";
-		
+		else {
+						
+				return "echec lecture";
+				
 		}
 		
 	}

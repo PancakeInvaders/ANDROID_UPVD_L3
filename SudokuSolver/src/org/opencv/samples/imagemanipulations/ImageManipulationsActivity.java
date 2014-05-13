@@ -24,7 +24,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 public class ImageManipulationsActivity extends Activity implements CvCameraViewListener2 {
     private static final String  TAG                 = "OCVSample::Activity";
@@ -52,7 +51,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     double sizeCell;
     double w2;
     
-    TextView messageTextView;
+    boolean computingImage = false;
     
     LectureIMG lecteur;
     
@@ -67,7 +66,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 		}
 	};
 	
-	Thread t = new Thread(r);
+	Thread t;
     
     private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -96,14 +95,10 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     	
     	lecteur = new LectureIMG(getAssets());
     	
+    	t = new Thread(r);
+    	
     	setContentView(R.layout.image_manipulations_surface_view);
-    	
-    	messageTextView = (TextView)findViewById(R.id.text_id);
-    	
-    	messageTextView.setVisibility(View.INVISIBLE);
-    	
-  // TODO Faire en sorte que le TextView soit invisible lorsqu'on lance l'application, puis, passe visible lorsqu'on lance le solve
-    	
+    	    	    	
     	listADessiner = new ArrayList<PointValue>();
         Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
@@ -298,26 +293,24 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
         
         }
         
-
-
+        if(computingImage == true){
+        	
+        	String s = "Calculs sur image ... Cela peut prendre plusieurs minutes";
+        	
+        	Core.putText(rgba, s, new Point (w/2 - (8.2)*s.length(), h - 50), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(160,160,160), 3);
+        }
 
         return rgba;
     }
     
-    
     public void resolveSudokuThread(View view){
     	
-
-    	messageTextView.setVisibility(View.VISIBLE);
-    	
-    // TODO Faire en sorte que le TextView soit invisible lorsqu'on lance l'application, puis, passe visible lorsqu'on lance le solve
-
 
     	if(t.isAlive() == false){
     		t.start();
     	}
+    	
     }
-    
     
     public void resolveSudoku() {
     	
@@ -336,11 +329,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			    	// Je part du principe que j'ai une fonction servant à lire un nombre dans une image 
 			    	// cette fonction ayant pour signature static String lireTextFromImage(Mat img);
 			    	
-			    	System.out.println("TEST");
-			    	
-			    	//messageTextView.setVisibility(View.VISIBLE);
-			    	
-			    	
+    				computingImage = true;
 			    	
 			    	
 			    	Mat imgCell;
@@ -348,8 +337,6 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			    	
 			    	double x = w/2 - sc2 - 4*sizeCell;
 			    	double y = 0;
-			    	
-			    	System.out.println("x: " + x + "y: " + y);
 			    	
 			    	// x et y representent le point en haut gauche de la cellule à lire, on les initialise en haut à gauche de la grille de sudoku
 			    	
@@ -366,12 +353,9 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 				    			
 				    	    	imgCell = rgba.submat((int)y, (int)(y + sizeCell), (int)x, (int)(x + sizeCell));
 				    	    	
-			  		    		System.out.println("[" + i + "][" + j + "] passed");
-
-				    			
 				    			number = lecteur.lireTextFromImage(imgCell);
 				    			
-				    			System.out.println(number);
+				    			System.out.println("[" + i + "][" + j +"] = " + number);
 				    			
 				    			if( number.matches("echec lecture") == false ){
 				    				
@@ -400,6 +384,10 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			    		
 			    		e.printStackTrace(System.out);
 			    		
+			    		computingImage = false;
+			    		
+			    		t = new Thread(r);
+			    		
 			    		return;
 			    	}
 			    
@@ -422,6 +410,9 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			    	    vibs.vibrate(500);   
 			    		
 			    		System.out.println("Aucun chiffre n'a été détecté");
+			    		
+			    		computingImage = false;
+			    		t = new Thread(r);
 			    		return;
 			    	}
 			    	
@@ -429,26 +420,30 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			    	
 			    	
 			    	
-			    	SolveSudoku solver = new SolveSudoku();
+			    	//SolveSudoku solver = new SolveSudoku();
+			    	Solver solver = new Solver(sudokuMatrice);
+
+			    	//solver.setModel(sudokuMatrice);
 			    	
-			    	solver.setModel(sudokuMatrice);
 			    	
-			    	try
-					{
-						solver.solve( 0 , 0);
-					}
-					catch (Exception e)
-					{
-						e.printStackTrace( );
-					}
-			    	
-			    	if( SolveSudoku.isValid( solver.getModel() ) == false){
-			    	
-			    		System.out.println("La lecture a échouée");
+			    	if( SolveSudoku.isValid( solver.grille ) ){
+			    		
+				    	try
+						{
+							solver.solve(0);
+						}
+						catch (Exception e)
+						{
+							e.printStackTrace( );
+						}
+			    	}
+				    else {
+			    		System.out.println("La lecture du sodoku a échouée");
 			    		
 			    		Vibrator vibs = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 			    	    vibs.vibrate(500); 
-			    	    
+			    	    computingImage = false;
+			    	    t = new Thread(r);
 			    	    return;
 			    		
 			    	}
@@ -460,7 +455,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			    	x = w/2 - sc2 - 4*sizeCell;
 			    	y = 0;
 			    	    	
-			    	int[][] sudokuResolu = solver.getModel();
+			    	int[][] sudokuResolu = solver.grille;
 			    	
 			    	
 			    	x = w/2 - sc2 - 4*sizeCell;
@@ -494,13 +489,13 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			    		x = w/2 - sc2 - 4*sizeCell;
 			    	}
 			    	
-			    	messageTextView.setVisibility(View.INVISIBLE);
 			    	
-			   // TODO Faire en sorte que le TextView soit invisible lorsqu'on lance l'application, puis, passe visible lorsqu'on lance le solve
+			    	computingImage = false;
 
-			    	
-			    	
+
     	}
+    	
+    	t = new Thread(r);
     }
     
     
