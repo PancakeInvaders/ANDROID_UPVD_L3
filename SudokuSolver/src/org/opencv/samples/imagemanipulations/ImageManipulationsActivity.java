@@ -1,7 +1,6 @@
 package org.opencv.samples.imagemanipulations;
 
 import java.util.ArrayList;
-
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.LoaderCallbackInterface;
@@ -14,16 +13,18 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class ImageManipulationsActivity extends Activity implements CvCameraViewListener2 {
     private static final String  TAG                 = "OCVSample::Activity";
@@ -35,7 +36,9 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     private MenuItem             mItemPreviewSudoku;
     private CameraBridgeViewBase mOpenCvCameraView;
 
-
+	Context context ;
+	CharSequence text = "Une erreur est survenue lors de l'analyse de l'image, la résolution du sudoku a été anulée";
+	int duration = Toast.LENGTH_LONG;
 
     private Mat                  mIntermediateMat;
     private int                  mHistSizeNum = 25;
@@ -50,6 +53,8 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     double sc2;
     double sizeCell;
     double w2;
+    
+    Toast toast;
     
     boolean computingImage = false;
     
@@ -90,14 +95,19 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     }
 
     /** Called when the activity is first created. */
-    @Override
+    @SuppressLint("ShowToast")
+	@Override
     public void onCreate(Bundle savedInstanceState) {
     	
     	lecteur = new LectureIMG(getAssets());
     	
     	t = new Thread(r);
     	
+    	context = getApplicationContext();
+    	
     	setContentView(R.layout.image_manipulations_surface_view);
+    	
+    	toast = Toast.makeText(context, text, duration);
     	    	    	
     	listADessiner = new ArrayList<PointValue>();
         Log.i(TAG, "called onCreate");
@@ -284,6 +294,8 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
         for(PointValue pv : listADessiner){
         	
         	
+        	
+        	
         	x = pv.getPoint().x;
         	y = pv.getPoint().y;
         	
@@ -305,6 +317,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     
     public void resolveSudokuThread(View view){
     	
+    	  	
 
     	if(t.isAlive() == false){
     		t.start();
@@ -322,14 +335,19 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			    	// les chiffres valables étant compris entre 1 et 9
 			    	// pour acceder à une case : matriceSudoku.get(x).get(y), en supposant qu'on a mit le telephone dans sa largeur
 			    	
-			    	
 			    	// fin de l'instanciation
 			  
 			    	
 			    	// Je part du principe que j'ai une fonction servant à lire un nombre dans une image 
 			    	// cette fonction ayant pour signature static String lireTextFromImage(Mat img);
 			    	
+	    			Mat img = rgba.submat(0, (int)h, 0, (int)w); // on sauvegarde l'image actuelle pour faire les lectures dessus
+
+    		
     				computingImage = true;
+    				
+	    			Looper.prepare();
+
 			    	
 			    	
 			    	Mat imgCell;
@@ -351,7 +369,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 				    		
 				    		for(int j = 0; j<9; j++){
 				    			
-				    	    	imgCell = rgba.submat((int)y, (int)(y + sizeCell), (int)x, (int)(x + sizeCell));
+				    	    	imgCell = img.submat((int)y, (int)(y + sizeCell), (int)x, (int)(x + sizeCell));
 				    	    	
 				    			number = lecteur.lireTextFromImage(imgCell);
 				    			
@@ -409,6 +427,8 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			    		Vibrator vibs = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 			    	    vibs.vibrate(500);   
 			    		
+			    	    toast.show();
+			    	    
 			    		System.out.println("Aucun chiffre n'a été détecté");
 			    		
 			    		computingImage = false;
@@ -441,6 +461,20 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			    		System.out.println("La lecture du sodoku a échouée");
 			    		
 			    		Vibrator vibs = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			    		
+			    		try {
+			    			
+			    		
+			    			toast.show();
+				    	    
+			    	    
+			    		}
+			    		catch(Exception e){
+			    			
+			    			e.printStackTrace(System.out);
+			    			return;
+			    		}
+			    	    
 			    	    vibs.vibrate(500); 
 			    	    computingImage = false;
 			    	    t = new Thread(r);
