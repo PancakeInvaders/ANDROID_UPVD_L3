@@ -120,7 +120,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     @SuppressLint("ShowToast")
 	@Override
     public void onCreate(Bundle savedInstanceState) {
-    	//
+    	// Crée un objet de la Classe LectureIMG
     	lecteur = new LectureIMG(getAssets());
 
     	// Lance le thread
@@ -135,7 +135,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     	//
     	toast = Toast.makeText(context, text, duration);
     	  
-    	//
+    	// Liste des chiffres de la grille a dessiner avec leur coordonées
     	listADessiner = new ArrayList<PointValue>();
         Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
@@ -359,7 +359,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
         	Core.putText(rgba, s, new Point (w/2 - (8.2)*s.length(), h - 50), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(160,160,160), 3);
         }
 
-        // Renvoi la matrice rba
+        // Renvoi la matrice rgba
         return rgba;
     }
     
@@ -523,7 +523,15 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 	    			// Sort de la fonction
 	    			return;
 	    		}*/
-	    	    
+	    		
+	    		//computingImage = false;
+	    	    //t = new Thread(r);
+	    	    //return;
+	    		
+	    		
+	    		/*
+	    		 * PRÉSENTATION
+	    		 */
 	    	    // Initialise une fausse grille pour la présentation
 	    		int fakeGrille[][] = {
 	        			{0,4,0,0,0,2,0,1,9},
@@ -540,10 +548,6 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 	    	    solver = new Solver(fakeGrille);
 	    	    // Résoud la grille
 				solver.solve(0);
-				
-				//computingImage = false;
-	    	    //t = new Thread(r);
-	    	    //return;
 		    }
 			
 	    	

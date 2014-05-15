@@ -136,12 +136,12 @@ public class LectureIMG {
 		baseApi.init(path.getAbsolutePath(), lang);
 		baseApi.setImage(bitmap);
 		baseApi.setVariable("tessedit_char_whitelist", "123456789"); // Definie le type de variable (caractère autorisé)
-		//baseApi.setVariable("VAR_BLN_NUMERICMODE", "123456789"); // Definie le type de variable (mode numeric)
+		//baseApi.setVariable("VAR_BLN_NUMERICMODE", "123456789"); // Definie le type de variable (mode numerique)
 		
 		// Recupere dans une chaine le caractère retourné
 		String recognizedText = baseApi.getUTF8Text();
 		
-		// Bool qui indique si le text a été parsé 
+		// Bool qui indique si le text a pu etre convertie 
 		boolean parsable = true;
 		// Variable qui recupere le chiffre
 		int num = 0;
@@ -165,7 +165,7 @@ public class LectureIMG {
 			return recognizedText;
 		}
 		else {
-				return "echec lecture";
+			return "echec lecture";
 		}
 	}
 }
