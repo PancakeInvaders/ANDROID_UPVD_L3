@@ -51,9 +51,9 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
      * Attributs
      * Public
      */
-    public static final int      VIEW_MODE_RGBA      = 0;
-    public static final int      VIEW_MODE_POSTERIZE = 7;
-    public static int           viewMode = VIEW_MODE_RGBA;
+    public static final int      VIEW_MODE_RGBA     = 0;
+    public static final int      VIEW_MODE_GRID 	= 7;
+    public static int            viewMode 			= VIEW_MODE_RGBA;
 
     /**
      * Variable Global
@@ -202,7 +202,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
         if (item == mItemVideo)
             viewMode = VIEW_MODE_RGBA;
         else if (item == mItemPreviewSudoku)
-            viewMode = VIEW_MODE_POSTERIZE;
+            viewMode = VIEW_MODE_GRID;
         return true;
     }
 
@@ -259,100 +259,12 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 	            break;
 	
 	        // MODE POSTERIZE
-	        case ImageManipulationsActivity.VIEW_MODE_POSTERIZE:
+	        case ImageManipulationsActivity.VIEW_MODE_GRID:
 	        	// Autorise l'execution du thread
 	        	threadStopRequest = false;
-	        	// Calcul la densité
-	        	int thickness = (int) (sizeRgba.width / (mHistSizeNum + 10) / 5);
-	            if(thickness > 5) thickness = 3;
 	            
-	            // Recupere la largeur et hauteur
-	            w = sizeRgba.width;
-	            h = sizeRgba.height;
-	            // Recupere le milieu de la grille
-	            w2 = w/2;
-	            // Taille d'une cellule
-	            sizeCell = h/9;
-	            // Recupere le milieu d'une cellule
-	            sc2 = sizeCell /2;
-	            
-	            // Initialise 2 points
-	            Point p1;
-	            Point p2;
-	            
-	            /*
-	             * Dessine les traits horizontals de la grille
-	             */
-	            p1 = new Point(w2 - sc2 - 4*sizeCell, 0);
-	            p2 = new Point(w2 - sc2 - 4*sizeCell, h);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
-	            p1 = new Point(w2 - sc2 - 3*sizeCell, 0);
-	            p2 = new Point(w2 - sc2 - 3*sizeCell, h);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
-	            p1 = new Point(w2 - sc2 - 2*sizeCell, 0);
-	            p2 = new Point(w2 - sc2 - 2*sizeCell, h);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
-	            
-	            p1 = new Point(w2 - sc2 - 1*sizeCell, 0);
-	            p2 = new Point(w2 - sc2 - 1*sizeCell, h);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
-	            p1 = new Point(w2 - sc2, 0);
-	            p2 = new Point(w2 - sc2, h);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);			
-	            p1 = new Point(w2 + sc2, 0);
-	            p2 = new Point(w2 + sc2, h);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
-	            
-	            p1 = new Point(w2 + sc2 + 1*sizeCell, 0);
-	            p2 = new Point(w2 + sc2 + 1*sizeCell, h);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
-	            p1 = new Point(w2 + sc2 + 2*sizeCell, 0);
-	            p2 = new Point(w2 + sc2 + 2*sizeCell, h);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
-	            p1 = new Point(w2 + sc2 + 3*sizeCell, 0);
-	            p2 = new Point(w2 + sc2 + 3*sizeCell, h);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
-	            
-	            p1 = new Point(w2 + sc2 + 4*sizeCell, 0);
-	            p2 = new Point(w2 + sc2 + 4*sizeCell, h);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
-	            
-	            /*
-	             * Dessine les traits verticaux de la grille
-	             */
-	            p1 = new Point(w/2 - h/2, h/2 - sc2 - 4*sizeCell);
-	            p2 = new Point(w/2 + h/2, h/2 - sc2 - 4*sizeCell);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
-	            p1 = new Point(w/2 - h/2, h/2 - sc2 - 3*sizeCell);
-	            p2 = new Point(w/2 + h/2, h/2 - sc2 - 3*sizeCell);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
-	            p1 = new Point(w/2 - h/2, h/2 - sc2 - 2*sizeCell);
-	            p2 = new Point(w/2 + h/2, h/2 - sc2 - 2*sizeCell);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
-	            
-	            p1 = new Point(w/2 - h/2, h/2 - sc2 - 1*sizeCell);
-	            p2 = new Point(w/2 + h/2, h/2 - sc2 - 1*sizeCell);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
-	            p1 = new Point(w/2 - h/2, h/2 - sc2);
-	            p2 = new Point(w/2 + h/2, h/2 - sc2);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);		
-	            p1 = new Point(w/2 - h/2, h/2 + sc2);
-	            p2 = new Point(w/2 + h/2, h/2 + sc2);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);		
-	            
-	            p1 = new Point(w/2 - h/2, h/2 + sc2 + 1*sizeCell);
-	            p2 = new Point(w/2 + h/2, h/2 + sc2 + 1*sizeCell);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
-	            p1 = new Point(w/2 - h/2, h/2 + sc2 + 2*sizeCell);
-	            p2 = new Point(w/2 + h/2, h/2 + sc2 + 2*sizeCell);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
-	            p1 = new Point(w/2 - h/2, h/2 + sc2 + 3*sizeCell);
-	            p2 = new Point(w/2 + h/2, h/2 + sc2 + 3*sizeCell);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
-	            
-	            p1 = new Point(w/2 - h/2, h/2 + sc2 + 4*sizeCell);
-	            p2 = new Point(w/2 + h/2, h/2 + sc2 + 4*sizeCell);
-	            Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
+	            // Fonction qui dessine la grille du sudoku
+	            drawGridVoid();
 	            
 		        // On dessine les chiffres de la grille résolue
 	            // Initialise les points x et y
@@ -398,7 +310,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     public void resolveSudoku() {
     	
     	// Si Mode Posterize
-    	if (ImageManipulationsActivity.viewMode == ImageManipulationsActivity.VIEW_MODE_POSTERIZE ){
+    	if (ImageManipulationsActivity.viewMode == ImageManipulationsActivity.VIEW_MODE_GRID ){
 	 	   	// extraire grille de l'img , puis résoude la grille, puis corriger l'img
 	    	// instantiation de la matrice du sudoku à 0, de cette manière si il y a un 0, ça veux dire que c'est pas instancié
 	    	// les chiffres valables étant compris entre 1 et 9
@@ -570,6 +482,103 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     	
     	// Crée un objet thread
     	t = new Thread(r);
+    }
+    
+    /**
+     * Fonction qui dessine la grille du sudoku
+     */
+    public void drawGridVoid(){
+    	// Calcul la densité
+    	int thickness = (int) (sizeRgba.width / (mHistSizeNum + 10) / 5);
+        if(thickness > 5) thickness = 3;
+        
+        // Recupere la largeur et hauteur
+        w = sizeRgba.width;
+        h = sizeRgba.height;
+        // Recupere le milieu de la grille
+        w2 = w/2;
+        // Taille d'une cellule
+        sizeCell = h/9;
+        // Recupere le milieu d'une cellule
+        sc2 = sizeCell /2;
+        
+        // Initialise 2 points
+        Point p1;
+        Point p2;
+        
+        /*
+         * Dessine les traits horizontals de la grille
+         */
+        p1 = new Point(w2 - sc2 - 4*sizeCell, 0);
+        p2 = new Point(w2 - sc2 - 4*sizeCell, h);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
+        p1 = new Point(w2 - sc2 - 3*sizeCell, 0);
+        p2 = new Point(w2 - sc2 - 3*sizeCell, h);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
+        p1 = new Point(w2 - sc2 - 2*sizeCell, 0);
+        p2 = new Point(w2 - sc2 - 2*sizeCell, h);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
+        
+        p1 = new Point(w2 - sc2 - 1*sizeCell, 0);
+        p2 = new Point(w2 - sc2 - 1*sizeCell, h);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
+        p1 = new Point(w2 - sc2, 0);
+        p2 = new Point(w2 - sc2, h);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);			
+        p1 = new Point(w2 + sc2, 0);
+        p2 = new Point(w2 + sc2, h);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
+        
+        p1 = new Point(w2 + sc2 + 1*sizeCell, 0);
+        p2 = new Point(w2 + sc2 + 1*sizeCell, h);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
+        p1 = new Point(w2 + sc2 + 2*sizeCell, 0);
+        p2 = new Point(w2 + sc2 + 2*sizeCell, h);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
+        p1 = new Point(w2 + sc2 + 3*sizeCell, 0);
+        p2 = new Point(w2 + sc2 + 3*sizeCell, h);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
+        
+        p1 = new Point(w2 + sc2 + 4*sizeCell, 0);
+        p2 = new Point(w2 + sc2 + 4*sizeCell, h);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
+        
+        /*
+         * Dessine les traits verticaux de la grille
+         */
+        p1 = new Point(w/2 - h/2, h/2 - sc2 - 4*sizeCell);
+        p2 = new Point(w/2 + h/2, h/2 - sc2 - 4*sizeCell);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
+        p1 = new Point(w/2 - h/2, h/2 - sc2 - 3*sizeCell);
+        p2 = new Point(w/2 + h/2, h/2 - sc2 - 3*sizeCell);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
+        p1 = new Point(w/2 - h/2, h/2 - sc2 - 2*sizeCell);
+        p2 = new Point(w/2 + h/2, h/2 - sc2 - 2*sizeCell);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
+        
+        p1 = new Point(w/2 - h/2, h/2 - sc2 - 1*sizeCell);
+        p2 = new Point(w/2 + h/2, h/2 - sc2 - 1*sizeCell);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
+        p1 = new Point(w/2 - h/2, h/2 - sc2);
+        p2 = new Point(w/2 + h/2, h/2 - sc2);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);		
+        p1 = new Point(w/2 - h/2, h/2 + sc2);
+        p2 = new Point(w/2 + h/2, h/2 + sc2);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);		
+        
+        p1 = new Point(w/2 - h/2, h/2 + sc2 + 1*sizeCell);
+        p2 = new Point(w/2 + h/2, h/2 + sc2 + 1*sizeCell);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
+        p1 = new Point(w/2 - h/2, h/2 + sc2 + 2*sizeCell);
+        p2 = new Point(w/2 + h/2, h/2 + sc2 + 2*sizeCell);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
+        p1 = new Point(w/2 - h/2, h/2 + sc2 + 3*sizeCell);
+        p2 = new Point(w/2 + h/2, h/2 + sc2 + 3*sizeCell);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), thickness);
+        
+        p1 = new Point(w/2 - h/2, h/2 + sc2 + 4*sizeCell);
+        p2 = new Point(w/2 + h/2, h/2 + sc2 + 4*sizeCell);
+        Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
     }
     
 }
