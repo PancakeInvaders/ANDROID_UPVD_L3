@@ -1,6 +1,7 @@
 package org.opencv.samples.imagemanipulations;
 
 import java.util.ArrayList;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.LoaderCallbackInterface;
@@ -13,6 +14,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -65,6 +67,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 	double sizeCell;
 	double w2;
 	boolean computingImage = false; // Bool qui indique si oui ou non l'image doit etre calculé
+	boolean threadStopRequest; // Autorise ou Non l'execution du thread
     Mat rgba;
     Size sizeRgba;
     Toast toast;
@@ -73,9 +76,10 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     Thread t;
     
     
+    
     /**
      * Méthode Privée
-     * Thread
+     * Thread de ResolveSudoku
      */
     private Runnable r = new Runnable() {
 		@Override
@@ -122,28 +126,28 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
     public void onCreate(Bundle savedInstanceState) {
     	// Crée un objet de la Classe LectureIMG
     	lecteur = new LectureIMG(getAssets());
+    	
+    	// Autorise l'execution du thread de resolution
+    	threadStopRequest = false;
 
     	// Lance le thread
     	t = new Thread(r);
     	
-    	//
-    	context = getApplicationContext();
-    	
     	// Initialise la couche view
     	setContentView(R.layout.image_manipulations_surface_view);
     	
-    	//
+    	// Prepare le toast
+    	context = getApplicationContext();
     	toast = Toast.makeText(context, text, duration);
     	  
     	// Liste des chiffres de la grille a dessiner avec leur coordonées
     	listADessiner = new ArrayList<PointValue>();
-        Log.i(TAG, "called onCreate");
+        
+    	Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         setContentView(R.layout.image_manipulations_surface_view);
 
-        //
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.image_manipulations_activity_surface_view);
         mOpenCvCameraView.setCvCameraViewListener(this);
     }
@@ -237,12 +241,27 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 
         // Switch en fonction du mode sélectionné
         switch (ImageManipulationsActivity.viewMode) {
+        
         	// Mode RGBA 
 	        case ImageManipulationsActivity.VIEW_MODE_RGBA:
+	        	// Stop le traitement en cours
+	        	if(t.isAlive()) {
+	        		// Demande l'arret du thread
+	        		threadStopRequest = true;
+	        		// Attend que le thread s'arrete
+	        		while(t.isAlive() == true){}
+	        		// Relance un nouveau thread
+	        		t = new Thread(r);
+	        		computingImage = false;
+	        		// Réinitialise la liste des chiffres
+	        		listADessiner = new ArrayList<PointValue>();
+	        	}
 	            break;
 	
 	        // MODE POSTERIZE
 	        case ImageManipulationsActivity.VIEW_MODE_POSTERIZE:
+	        	// Autorise l'execution du thread
+	        	threadStopRequest = false;
 	        	// Calcul la densité
 	        	int thickness = (int) (sizeRgba.width / (mHistSizeNum + 10) / 5);
 	            if(thickness > 5) thickness = 3;
@@ -335,30 +354,30 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 	            p2 = new Point(w/2 + h/2, h/2 + sc2 + 4*sizeCell);
 	            Core.line(rgba, p1, p2, new Scalar(250,250,250), 3*thickness);
 	            
-	            break;
-        }
-	        
-        // Initialise les points x et y
-        double x;
-        double y;
-
-        // On dessine les chiffres de la grille résolue
-        for(PointValue pv : listADessiner){
-        	// Recupere les coordonnées pour ecrire
-        	x = pv.getPoint().x;
-        	y = pv.getPoint().y;
-        	
-        	// Ecrit le chiffre sur la grille
-            Core.putText(rgba, "" + pv.getValue(), new Point (x + (sc2/2) - 5, y + sizeCell - (sc2/2)  + 7), Core.FONT_HERSHEY_SIMPLEX, 2, new Scalar(25,25,25), 10);
+		        // On dessine les chiffres de la grille résolue
+	            // Initialise les points x et y
+		        double x;
+		        double y;
+		
+		        for(PointValue pv : listADessiner){
+		        	// Recupere les coordonnées pour ecrire
+		        	x = pv.getPoint().x;
+		        	y = pv.getPoint().y;
+		        	
+		        	// Ecrit le chiffre sur la grille
+		            Core.putText(rgba, "" + pv.getValue(), new Point (x + (sc2/2) - 5, y + sizeCell - (sc2/2)  + 7), Core.FONT_HERSHEY_SIMPLEX, 2, new Scalar(25,25,25), 10);
+		        }
+		        
+		        // Si l'image doit etre calculée alors
+		        if(computingImage == true){
+		        	// Affiche la chaine d'attente
+		        	String s = "Calcul de l'image... Cela peut prendre plusieurs minutes.";
+		        	Core.putText(rgba, s, new Point (w/2 - (8.2)*s.length(), h - 50), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255,117,5), 3);
+		        }
+		        
+		        break;
         }
         
-        // Si l'image doit etre calculée alors
-        if(computingImage == true){
-        	// Affiche la chaine d'attente
-        	String s = "Calcul de l'image... Cela peut prendre plusieurs minutes.";
-        	Core.putText(rgba, s, new Point (w/2 - (8.2)*s.length(), h - 50), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(160,160,160), 3);
-        }
-
         // Renvoi la matrice rgba
         return rgba;
     }
@@ -395,7 +414,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 			// Indique que l'image doit etre calculée
 			computingImage = true;
 	
-			//
+			// Appel à Looper.prepare dans le but de preparer le thread à l'affichage de Toasts
 			Looper.prepare();
 	
 			// Initialise une variable de type Matrice et String
@@ -415,13 +434,17 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 	    		
 	    		// Parcour les lignes
 		    	for(int i = 0; i<9; i++){
+
 		    		// Parcour les colonnes
 		    		for(int j = 0; j<9; j++){
+		    			// Sort du traitement (arret du thread en cas de demande)
+		    			if(threadStopRequest == true) return;
+		    			
 		    			// Extrait la cellule
 		    	    	imgCell = img.submat((int)y, (int)(y + sizeCell), (int)x, (int)(x + sizeCell));
 		    	    	
 		    	    	// Recupere le nombre renvoyé par la fonction
-		    			number = lecteur.lireTextFromImage(imgCell);
+	    	    		number = lecteur.lireTextFromImage(imgCell);
 		    			
 		    			System.out.println("[" + i + "][" + j +"] = " + number);
 		    			
@@ -449,48 +472,11 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 	    	catch(Exception e){
 	    		System.out.println("Exception e occured");
 	    		e.printStackTrace(System.out);
-	    		computingImage = false;
-	    		t = new Thread(r);
+	    		computingImage = false; 
+	    		t = new Thread(r); // Instancie la classe Thread et lance dans un thread la fonction ResolveSudoku
 	    		return;
 	    	}
 	    
-	    	// Indique que tout est a 0
-	    	boolean fullzero = true;
-	    	
-	    	// Verifie si la matrice a au moins un chiffre différent de 0
-			for(int i = 0; i<9; i++){
-	    		for(int j = 0; j<9; j++){
-		    		if(sudokuMatrice[i][j] != 0)
-		    		{
-		    			fullzero = false;
-		    		}
-	    		}
-	    	}
-	    	
-			/*
-			 * Si la matrice est a 0
-			 * Erreur d'information a l'utilisateur
-			 */ 
-	    	if(fullzero == true){
-	    		// Fait vibrer le téléphone
-	    		Vibrator vibs = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-	    	    vibs.vibrate(500);   
-	    		
-	    	    //
-	    	    toast.show();
-	    	    
-	    	    // Message utilisateur
-	    		System.out.println("Aucun chiffre n'a été détecté");
-	    		
-	    		// Pas d'analyse d'image
-	    		computingImage = false;
-	    		t = new Thread(r);
-	    		
-	    		// Sort de la fonction
-	    		return; 
-	    	}
-	    	
-	
 	    	/*
 	    	 * Résolution du sudoku à l'aide de l'algo
 	    	 */
@@ -514,7 +500,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 	    		Vibrator vibs = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 	    		vibs.vibrate(500); 
 	    		
-	    		/*
+	    		// Affiche qu'il y a eu un probleme
 	    		try {
 	    			toast.show();
 	    		}
@@ -522,7 +508,7 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 	    			e.printStackTrace(System.out);
 	    			// Sort de la fonction
 	    			return;
-	    		}*/
+	    		}
 	    		
 	    		//computingImage = false;
 	    	    //t = new Thread(r);
@@ -582,9 +568,8 @@ public class ImageManipulationsActivity extends Activity implements CvCameraView
 	    	computingImage = false;
     	}
     	
-    	//
+    	// Crée un objet thread
     	t = new Thread(r);
     }
-    
     
 }

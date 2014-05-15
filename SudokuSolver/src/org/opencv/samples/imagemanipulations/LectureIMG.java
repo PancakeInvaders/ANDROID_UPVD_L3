@@ -136,7 +136,6 @@ public class LectureIMG {
 		baseApi.init(path.getAbsolutePath(), lang);
 		baseApi.setImage(bitmap);
 		baseApi.setVariable("tessedit_char_whitelist", "123456789"); // Definie le type de variable (caractère autorisé)
-		//baseApi.setVariable("VAR_BLN_NUMERICMODE", "123456789"); // Definie le type de variable (mode numerique)
 		
 		// Recupere dans une chaine le caractère retourné
 		String recognizedText = baseApi.getUTF8Text();
