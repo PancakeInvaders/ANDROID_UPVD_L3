@@ -47,49 +47,6 @@ public class Solver {
 		// Si la valeur k n'existe pas, return vrai
 		return true;
 	}
-	
-	public static boolean isValid(int[][] board)
-	{
-		// Check rows and columns
-		for (int i = 0; i < board.length; i++)
-		{
-			BitSet bsRow = new BitSet( 9);
-			BitSet bsColumn = new BitSet( 9);
-			for (int j = 0; j < board[i].length; j++)
-			{
-				if (board[i][j] == 0 || board[j][i] == 0)
-					continue;
-				if (bsRow.get( board[i][j] - 1) || bsColumn.get( board[j][i] - 1))
-					return false;
-				else
-				{
-					bsRow.set( board[i][j] - 1);
-					bsColumn.set( board[j][i] - 1);
-				}
-			}
-		}
-		// Check within 3 x 3 grid
-		for (int rowOffset = 0; rowOffset < 9; rowOffset += 3)
-		{
-			for (int columnOffset = 0; columnOffset < 9; columnOffset += 3)
-			{
-				BitSet threeByThree = new BitSet( 9);
-				for (int i = rowOffset; i < rowOffset + 3; i++)
-				{
-					for (int j = columnOffset; j < columnOffset + 3; j++)
-					{
-						if (board[i][j] == 0)
-							continue;
-						if (threeByThree.get( board[i][j] - 1))
-							return false;
-						else
-							threeByThree.set( board[i][j] - 1);
-					}
-				}
-			}
-		}
-		return true;
-	}
 
 	/**
 	* Fonction qui cherche l'existance d'une valeur dans la grille sur les colonnes
@@ -131,6 +88,7 @@ public class Solver {
 	/**
 	 * Fonction qui résoud une grille de sudoku, de manière récursive
 	 * Utilisation du backtracking
+	 * @param int : Position
 	 * @return boolean
 	 */
 	public boolean solve (int position) {
@@ -162,5 +120,56 @@ public class Solver {
 		// Tous les chiffres ont été testés, aucun n'est bon, on réinitialise la case
 		this.grille[i][j] = 0;
 		return false;
+	}
+	
+	/**
+	 * Methode qui verifie si la grille est valide
+	 * @param board
+	 * @return boolean
+	 */
+	public static boolean isValid(int[][] board)
+	{
+		// Verifie les lignes et les colonnes
+		for (int i = 0; i < board.length; i++)
+		{
+			BitSet bsRow = new BitSet( 9);
+			BitSet bsColumn = new BitSet( 9);
+			for (int j = 0; j < board[i].length; j++)
+			{
+				if (board[i][j] == 0 || board[j][i] == 0)
+					continue;
+				if (bsRow.get( board[i][j] - 1) || bsColumn.get( board[j][i] - 1))
+					return false;
+				else
+				{
+					bsRow.set( board[i][j] - 1);
+					bsColumn.set( board[j][i] - 1);
+				}
+			}
+		}
+		
+		// Verifie la taille de la grile
+		for (int rowOffset = 0; rowOffset < 9; rowOffset += 3)
+		{
+			for (int columnOffset = 0; columnOffset < 9; columnOffset += 3)
+			{
+				BitSet threeByThree = new BitSet( 9);
+				for (int i = rowOffset; i < rowOffset + 3; i++)
+				{
+					for (int j = columnOffset; j < columnOffset + 3; j++)
+					{
+						if (board[i][j] == 0)
+							continue;
+						if (threeByThree.get( board[i][j] - 1))
+							return false;
+						else
+							threeByThree.set( board[i][j] - 1);
+					}
+				}
+			}
+		}
+		
+		// Renvoie Vrai
+		return true;
 	}
 }

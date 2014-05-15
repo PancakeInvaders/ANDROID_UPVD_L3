@@ -18,148 +18,154 @@ import android.os.Environment;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 
+/**
+ * Reconnaisance de caractere d'une image
+ * @author CAMPOY - CANO
+ */
 public class LectureIMG {
-	
+
+	/**
+	 * Attributs
+	 */
 	File path;
 	File pathtess;
-	
 	public final String lang = "eng";
 
-
-	
+	/**
+	 * Constructeur surchargé
+	 * @param assetManager
+	 */
 	public LectureIMG(AssetManager assetManager) {
-	
+		// Chemin du répertoire image du téléphone
 		path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 		
+		// Création du fichier avec son chemin
 		pathtess = new File(path.getAbsolutePath() + "/tessdata");
 
-	
-			String[] paths = new String[] { path.getAbsolutePath(), pathtess.getAbsolutePath() };
-	
-			for (String path : paths) {
-				File dir = new File(path);
-				if (!dir.exists()) {
-					if (!dir.mkdirs()) {
-						System.out.println("ERROR: Creation of directory " + path + " on storage has failed");
-						return;
-					} else {
-						System.out.println( "Created directory " + path + " on sdcard");
-					}
-				}
-	
-			}
-			
-			// lang.traineddata file with the app (in assets folder)
-			// You can get them at:
-			// http://code.google.com/p/tesseract-ocr/downloads/list
-			// This area needs work and optimization
-			if (!(new File(path + "/tessdata/" + lang + ".traineddata")).exists()) {
-				try {
-	
-					
-					InputStream in = assetManager.open("tessdata/" + lang + ".traineddata");
-					//GZIPInputStream gin = new GZIPInputStream(in);
-					//new File(path + "/tessdata/" + lang + ".traineddata").createNewFile();
-					OutputStream out = new FileOutputStream(path
-							+ "/tessdata/" + lang + ".traineddata");
-	
-					// Transfer bytes from in to out
-					byte[] buf = new byte[1024];
-					int len;
-					//while ((lenf = gin.read(buff)) > 0) {
-					while ((len = in.read(buf)) > 0) {
-						out.write(buf, 0, len);
-					}
-					in.close();
-					//gin.close();
-					out.close();
-					
-				} catch (IOException e) {
-					e.printStackTrace(System.out);
+		// Tableau de chemin
+		String[] paths = new String[] { path.getAbsolutePath(), pathtess.getAbsolutePath() };
+
+		// Parcour des chemins
+		for (String path : paths) {
+			File dir = new File(path);
+			// Si le dossier n'existe pas
+			if (!dir.exists()) {
+				// Si la création du dossier echoue
+				if (!dir.mkdirs()) {
+					System.out.println("ERREUR: Creation du dossier " + path + " sur le stockage a echouee.");
+					return;
+				} else {
+					System.out.println( "Création du dossier " + path + " sur la carte sd.");
 				}
 			}
+
+		}
 		
-		
-		
-		
-	
+		// http://code.google.com/p/tesseract-ocr/downloads/list
+		// Optimisation possible ?
+		// Si le fichier n'existe pas deja
+		if (!(new File(path + "/tessdata/" + lang + ".traineddata")).exists()) {
+			try {
+				//
+				InputStream in = assetManager.open("tessdata/" + lang + ".traineddata");
+				OutputStream out = new FileOutputStream(path + "/tessdata/" + lang + ".traineddata");
+
+				byte[] buf = new byte[1024];
+				int len;
+
+				while ((len = in.read(buf)) > 0) {
+					out.write(buf, 0, len);
+				}
+				in.close();
+
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace(System.out);
+			}
+		}
 	}
 	
 	
-	
+	/**
+	 * OCR : Reconnaissance de caractere 
+	 * A partir d'une matrice image
+	 * @param img
+	 * @return String
+	 */
 	public String lireTextFromImage(Mat img){
+		/*
+		 * Je part du principe que cette fonction sert à lire du texte (ou un nombre) dans une image
+		 * en cas de de reussite elle renvoie une renvoie le texte lu
+		 * en cas d'echec elle renvoie la chaine de caractères "echec lecture"
+		 */
 		
-		// Je part du principe que cette fonction sert à lire du texte (ou un nombre) dans une image 
-		
-		// en cas de de reussite elle renvoie une renvoie le texte lu
-		
-		// en cas d'echec elle renvoie la chaine de caractères "echec lecture"
-
+		// Nom du fichier
 		String filename = "temporary_file.png";
+		// Nouveau fichier
 		File file = new File(pathtess, filename);
+		//
 		filename = file.toString();
 		Highgui.imwrite(filename, img);
 		
+		// Crée un objet BitmalFactory
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inSampleSize = 4;
-
+		// Decode le fichier en bitmap
 		Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-		
+		// Copie le bitmap avec manipulation
 		bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 		
+		// Si pathtess n'existe pas
 		if(pathtess.exists() == false){
-			
+			// Crée le dossier
 			boolean result = pathtess.mkdir();
-			
+			// Si le dossier est crée
 			if(result == true){
-			
+				// Message 
 				System.out.println("dir created");
-				
 			}
-			
 		}
-		
+
+		/*
+		 * Reconnaissance de caractère
+		 * Utilisation de Tesseract
+		 */
+		// Crée un objet de type TessBaseAPI et l'initialise
 		TessBaseAPI baseApi = new TessBaseAPI();
 		baseApi.setDebug(true);
 		baseApi.init(path.getAbsolutePath(), lang);
 		baseApi.setImage(bitmap);
+		baseApi.setVariable("tessedit_char_whitelist", "123456789"); // Definie le type de variable (caractère autorisé)
+		//baseApi.setVariable("VAR_BLN_NUMERICMODE", "123456789"); // Definie le type de variable (mode numeric)
 		
-		baseApi.setVariable("tessedit_char_whitelist", "123456789");
-		
+		// Recupere dans une chaine le caractère retourné
 		String recognizedText = baseApi.getUTF8Text();
 		
+		// Bool qui indique si le text a été parsé 
 		boolean parsable = true;
-		
+		// Variable qui recupere le chiffre
 		int num = 0;
-		
+
+		// Parse le caractere
 		try{
-			
 			num = Integer.parseInt(recognizedText);
-			
 		}
 		catch(NumberFormatException e ){
-			
 			parsable = false;
-			
 		}
 		
+		// Si le caractere a ete parse
 		if(parsable == true){
-			
+			// Si le chiffre est inférieur a 1 et superieur a 9
 			if((num < 1) || (num > 9)){
-				
 				return "echec lecture";
-				
 			}
 			
+			// Renvoie la reconnaisance du texte
 			return recognizedText;
-			
 		}
 		else {
-						
 				return "echec lecture";
-				
 		}
-		
 	}
-
 }
