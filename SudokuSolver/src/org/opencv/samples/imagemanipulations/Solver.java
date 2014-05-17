@@ -109,7 +109,7 @@ public class Solver {
 		for (int k=1; k <= this.grille.length; k++) {
 			// Si la valeur est absente (autorisée)
 			if (absentSurLigne(k,i) && absentSurColonne(k,j) && absentSurBloc(k,i,j)) {
-				// ENregistrement de k dans la grille
+				// Enregistrement de k dans la grille
 				this.grille[i][j] = k;
 					
 				// Appel récursif de la fonction, afin de vérifier si par la suite ce choix est correct.
